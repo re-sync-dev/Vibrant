@@ -1,0 +1,26 @@
+{
+	"name": "Vibrant",
+	"tree": {
+		"$className": "Folder",
+
+		"Main": {
+			"$path": "src/plugin",
+
+			"Packages": {
+				"$path": "Packages"
+			},
+
+			"Interface": {
+				"$path": "src/interface",
+
+				"Templates": {
+					"$path": "./assets/templates.rbxm"
+				},
+
+				"Widgets": {
+					"$path": "./assets/widgets.rbxm"
+				}
+			}
+		}
+	}
+}

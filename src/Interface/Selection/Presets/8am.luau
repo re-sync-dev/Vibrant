@@ -1,0 +1,37 @@
+return {
+	GlobalShadows = true,
+	Brightness = 2,
+	DiffuseScale = 1,
+	Exposure = 0,
+	ShadowSoftness = 0.25,
+	SpecularScale = 1,
+	Atmosphere = {
+		Density = 0.326,
+		Glare = 0.1,
+		Haze = 1.5,
+		Offset = 1,
+		Color = Color3.fromRGB(217, 250, 247),
+		Decay = Color3.fromRGB(225, 255, 254),
+	},
+	ColorShift = {
+		Bottom = Color3.fromRGB(0, 0, 0),
+		Top = Color3.fromRGB(0, 0, 0),
+	},
+	Sky = {
+		CelestialBodies = false,
+		StarCount = 3000,
+		Back = "rbxassetid://566598488",
+		Bottom = "rbxassetid://566598717",
+		Front = "rbxassetid://566598536",
+		Left = "rbxassetid://566598581",
+		Right = "rbxassetid://566598640",
+		Top = "rbxassetid://566598894",
+		Orientation = Vector3.new(0, 0, 0),
+	},
+	Time = {
+		Clock = 15.5,
+		Latitude = 0,
+	},
+	Ambient = Color3.fromRGB(10, 9, 12),
+	OutdoorAmbient = Color3.fromRGB(34, 26, 36),
+}

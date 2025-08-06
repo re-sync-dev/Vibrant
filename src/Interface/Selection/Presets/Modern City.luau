@@ -1,0 +1,60 @@
+return {
+	GlobalShadows = true,
+	Brightness = 2,
+	DiffuseScale = 1,
+	Exposure = 0,
+	ShadowSoftness = 0.25,
+	SpecularScale = 1,
+	Atmosphere = {
+		Density = 0.324,
+		Glare = 0.3,
+		Haze = 2.029,
+		Offset = 0.736,
+		Color = Color3.fromRGB(255, 214, 172),
+		Decay = Color3.fromRGB(255, 202, 175),
+	},
+	Bloom = {
+		Intensity = 0.5,
+		Size = 24,
+		Threshold = 1.85,
+	},
+	ColorCorrection = {
+		Brightness = 0.085,
+		Contrast = 0.15,
+		Saturation = 0,
+		TintColor = Color3.fromRGB(255, 255, 255),
+	},
+	ColorShift = {
+		Bottom = Color3.fromRGB(0, 0, 0),
+		Top = Color3.fromRGB(0, 0, 0),
+	},
+	Sky = {
+		CelestialBodies = true,
+		StarCount = 3000,
+		Back = "rbxassetid://11263062161",
+		Bottom = "rbxassetid://11263065295",
+		Front = "rbxassetid://11263066644",
+		Left = "rbxassetid://11263068413",
+		Right = "rbxassetid://11263069782",
+		Top = "rbxassetid://11263070890",
+		Moon = {
+			Size = 11,
+			Texture = "rbxassetid://6444320592",
+		},
+		Sun = {
+			Size = 4,
+			Texture = "rbxassetid://6196665106",
+		},
+		Orientation = Vector3.new(0, 0, 0),
+	},
+	SunRays = {
+		Intensity = 0.035,
+		Spread = 0.335,
+	},
+	Time = {
+		Clock = 15.5,
+		Latitude = 0,
+	},
+	Ambient = Color3.fromRGB(10, 9, 12),
+	OutdoorAmbient = Color3.fromRGB(34, 26, 36),
+}
