@@ -46,6 +46,7 @@ function Preview.Set(Name: string, Preset: Types.Preset)
 
 	Widget.Enabled = true
 	WidgetUI.Notice.Visible = true
+	WidgetUI.Preset.Text = Name
 
 	for _, Child in WidgetUI.Viewport:GetChildren() do
 		if not Child:IsA("BasePart") then
