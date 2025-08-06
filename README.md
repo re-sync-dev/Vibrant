@@ -1,4 +1,6 @@
-<img align="left" src="./assets/logo-dark.png#gh-dark-mode-only" alt="Vibrant"><img align="left" src="./assets/logo-light.png#gh-light-mode-only" alt="Vibrant"><a href="https://github.com/re-sync-dev/Vibrant/releases" align="right">Download</a>
+<div><img align="left" src="./assets/logo-dark.png#gh-dark-mode-only" alt="Vibrant"><img align="left" src="./assets/logo-light.png#gh-light-mode-only" alt="Vibrant"></div>
+
+___
 
 Vibrant is lighting preset plugin that makes creating, modifying, and experimenting with lighting that much easier.
 
