@@ -14,11 +14,11 @@
 				"$path": "src/interface",
 
 				"Templates": {
-					"$path": "./assets/templates.rbxm"
+					"$path": "./assets/Templates.rbxm"
 				},
 
 				"Widgets": {
-					"$path": "./assets/widgets.rbxm"
+					"$path": "./assets/Widgets.rbxm"
 				}
 			}
 		}
