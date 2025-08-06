@@ -31,4 +31,3 @@ jobs:
                   automatic_release_tag: "Latest"
                   files: |
                       Vibrant.rbxm
-                      LICENSE
