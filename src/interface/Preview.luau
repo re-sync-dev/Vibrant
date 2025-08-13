@@ -1,9 +1,8 @@
 -- Modules:
 local Root = script.Parent.Parent
 
-local PresetHelper = require(script.Parent.Parent.Modules.PresetHelper)
-local Types = require(Root.Types)
 local Fusion = require(Root.Packages.Fusion)
+local Nebulight = require(Root.Packages.Nebulight)
 
 -- Types:
 type WidgetUI = typeof(script.Parent.Widgets.Preview)
@@ -32,9 +31,9 @@ Preview.Orientation = Computed(function()
 end, Fusion.cleanup)
 Preview.Dragging = false
 Preview._UpdateThread = nil :: thread?
-Preview._Preset = nil :: Types.Preset?
+Preview._Preset = nil :: Nebulight.Preset?
 
-function Preview.Set(Name: string, Preset: Types.Preset)
+function Preview.Set(Name: string, Preset: Nebulight.Preset)
 	local Widget = Preview.Widget
 	local WidgetUI = Widget and Widget:FindFirstChild("Main") :: WidgetUI
 
@@ -180,7 +179,7 @@ function Preview.Load(Plugin: Plugin)
 
 			Widget.Enabled = false
 
-			PresetHelper.Apply(Preview._Preset)
+			Nebulight.UsePreset(Preview._Preset)
 		end,
 	})
 
@@ -200,7 +199,7 @@ function Preview.Load(Plugin: Plugin)
 
 			Widget.Enabled = false
 
-			PresetHelper.Apply(Preview._Preset, true)
+			Nebulight.UsePreset(Preview._Preset, true)
 		end,
 	})
 end
