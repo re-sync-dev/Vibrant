@@ -93,6 +93,23 @@ function Selection.AddPreset(Name: string, Preset: Nebulight.Preset)
 	Selection.Refresh()
 end
 
+function Selection.RemovePreset(Preset: PresetInfo)
+	local Index = table.find(Selection.CustomPresets, Preset)
+
+	if not Index then
+		return
+	end
+
+	table.remove(Selection.CustomPresets, Index)
+
+	local CustomPresets = Util.Copy(Selection.CustomPresets, true)
+	RecursiveEncode(CustomPresets)
+
+	Selection.Plugin:SetSetting("Presets", HttpService:JSONEncode(CustomPresets))
+
+	Selection.Refresh()
+end
+
 function Selection.Refresh()
 	local Plugin = Selection.Plugin
 
@@ -120,7 +137,7 @@ function Selection.Refresh()
 
 	local SearchQuery = Selection.Filter.Query
 
-	local function CreateEntry(Index: number, PresetInfo: PresetInfo)
+	local function CreateEntry(Index: number, PresetInfo: PresetInfo, IsCustom: boolean?)
 		local Clone = script.Parent.Templates.PresetPreview:Clone()
 		Clone.Name = PresetInfo.Name
 		Clone.Preset.Label.Text = PresetInfo.Name
@@ -159,6 +176,31 @@ function Selection.Refresh()
 				Preview.Set(PresetInfo.Name, PresetInfo.Preset)
 			end,
 		})
+
+		local TrashColor = Value(Color3.new(0.5, 0, 0))
+		local TrashConfirmed = false
+
+		Hydrate(Clone.Trash)({
+			Active = true,
+			Visible = IsCustom or false,
+
+			ImageColor3 = Tween(TrashColor, TweenInfo.new(0.1)),
+
+			[OnEvent("MouseLeave")] = function()
+				TrashConfirmed = false
+				TrashColor:set(Color3.new(0.5, 0, 0))
+			end,
+
+			[OnEvent("Activated")] = function()
+				if TrashConfirmed then
+					-- TODO: Add delete logic
+					Selection.RemovePreset(PresetInfo)
+				else
+					TrashColor:set(Color3.new(1, 0, 0))
+					TrashConfirmed = true
+				end
+			end,
+		})
 	end
 
 	for Index, PresetInfo in Selection.Presets do
@@ -166,9 +208,11 @@ function Selection.Refresh()
 	end
 
 	for Index, PresetInfo in Selection.CustomPresets do
+		print(Index, PresetInfo.Name)
+
 		Index += #Selection.Presets --> Custom preset will always come after default ones
 
-		CreateEntry(Index, PresetInfo)
+		CreateEntry(Index, PresetInfo, true)
 	end
 end
 
