@@ -74,6 +74,7 @@ Selection.Plugin = nil :: Plugin?
 Selection.Widget = nil :: DockWidgetPluginGui?
 Selection.Presets = {} :: { PresetInfo }
 Selection.CustomPresets = {} :: { PresetInfo }
+Selection.ExportTarget = ""
 Selection.Filter = {
 	Query = Value(""),
 	OnlyFavorites = false,
@@ -173,7 +174,15 @@ function Selection.Refresh()
 			end,
 
 			[OnEvent("Activated")] = function()
-				Preview.Set(PresetInfo.Name, PresetInfo.Preset)
+				if Selection.ExportTarget == "Folder" then
+					Actions.ExportAsFolder(PresetInfo)
+				elseif Selection.ExportTarget == "Module" then
+					Actions.ExportAsModule(PresetInfo)
+				else
+					Preview.Set(PresetInfo.Name, PresetInfo.Preset)
+				end
+
+				Selection.ExportTarget = ""
 			end,
 		})
 
@@ -193,7 +202,6 @@ function Selection.Refresh()
 
 			[OnEvent("Activated")] = function()
 				if TrashConfirmed then
-					-- TODO: Add delete logic
 					Selection.RemovePreset(PresetInfo)
 				else
 					TrashColor:set(Color3.new(1, 0, 0))
@@ -208,8 +216,6 @@ function Selection.Refresh()
 	end
 
 	for Index, PresetInfo in Selection.CustomPresets do
-		print(Index, PresetInfo.Name)
-
 		Index += #Selection.Presets --> Custom preset will always come after default ones
 
 		CreateEntry(Index, PresetInfo, true)
@@ -286,6 +292,28 @@ function Selection.Load(Plugin: Plugin)
 				})
 			end, Fusion.cleanup),
 		},
+	})
+
+	local ExportWindow = WidgetUI.Export
+
+	Hydrate(ExportWindow.Close)({
+		[OnEvent("Activated")] = function()
+			ExportWindow.Visible = false
+		end,
+	})
+
+	Hydrate(ExportWindow.Folder)({
+		[OnEvent("Activated")] = function()
+			Selection.ExportTarget = "Folder"
+			ExportWindow.Visible = false
+		end,
+	})
+
+	Hydrate(ExportWindow.Module)({
+		[OnEvent("Activated")] = function()
+			Selection.ExportTarget = "Module"
+			ExportWindow.Visible = false
+		end,
 	})
 end
 

@@ -1,12 +1,21 @@
 -- Services:
 local CoreGui = game:GetService("CoreGui")
+local Lighting = game:GetService("Lighting")
+local Selection = game:GetService("Selection")
 
 -- Modules:
 local Nebulight = require(script.Parent.Parent.Parent.Packages.Nebulight)
 
 -- Types:
 type SelectionWidget = {
+	Widget: PluginGui & { Main: Frame & { Export: Frame } },
+
 	AddPreset: (Name: string, Preset: Nebulight.Preset) -> (),
+}
+
+type PresetInfo = {
+	Name: string,
+	Preset: Nebulight.Preset,
 }
 
 -- Main Module:
@@ -81,6 +90,65 @@ return {
 			local Preset = Nebulight.CreatePreset()
 
 			Widget.AddPreset(Name, Preset)
+			Container:Destroy()
 		end)
+	end,
+
+	Import = function(Widget: SelectionWidget)
+		local PresetRef: (ModuleScript | Folder)? = Selection:Get()[1]
+
+		if not PresetRef then
+			warn("No preset selected")
+			return
+		end
+
+		if PresetRef:IsA("ModuleScript") then
+			local Clone = PresetRef:Clone()
+			local Success, Result = pcall(require, Clone)
+
+			if not Success then
+				warn("Error while loading", PresetRef, `: {Result}`)
+				Clone:Destroy()
+
+				return
+			end
+
+			Widget.AddPreset(PresetRef.Name, Result)
+			Clone:Destroy()
+		elseif PresetRef:IsA("Folder") then
+			local Preset, DidCreate = Nebulight.CreateFromConfig(PresetRef)
+
+			if not DidCreate then
+				warn(
+					`Invalid preset config`,
+					PresetRef,
+					"(This could be caused by an invalid config or attempting to save an empty folder)"
+				)
+				return
+			end
+
+			Widget.AddPreset(PresetRef.Name, Preset)
+		end
+	end,
+
+	Export = function(Widget: SelectionWidget)
+		local ExportWindow = Widget.Widget.Main.Export
+
+		ExportWindow.Visible = not ExportWindow.Visible
+	end,
+
+	ExportAsFolder = function(Info: PresetInfo)
+		local ConfigRef = Nebulight.SaveAsConfig(Info.Preset)
+		ConfigRef.Name = Info.Name
+		ConfigRef.Parent = Lighting
+	end,
+
+	ExportAsModule = function(Info: PresetInfo)
+		local Source = "return " .. Nebulight.SaveAsModule(Info.Preset)
+
+		local ModuleScript = Instance.new("ModuleScript")
+		ModuleScript.Name = Info.Name
+		ModuleScript.Source = Source
+		ModuleScript.Parent = Lighting
 	end,
 }
