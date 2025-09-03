@@ -4,6 +4,7 @@ local HttpService = game:GetService("HttpService")
 -- Modules:
 local Root = script.Parent.Parent
 
+local Actions = require(script.Actions)
 local Preview = require(script.Parent.Preview)
 local Util = require(script.Parent.Util)
 
@@ -22,15 +23,16 @@ local WINDOW_WIDTH = 310
 local WINDOW_HEIGHT = 335
 
 -- Variables:
+local Children = Fusion.Children
 local Value = Fusion.Value
 local Computed = Fusion.Computed
 local Hydrate = Fusion.Hydrate
+local ForValues = Fusion.ForValues
 local OnChange = Fusion.OnChange
 local OnEvent = Fusion.OnEvent
 local Tween = Fusion.Tween
 
 -- Functions:
--- NOTE: Ensure non primitives are properly encoded
 local function RecursiveEncode(T: any)
 	for Key, Value in T do
 		if typeof(Value) == "table" then
@@ -45,7 +47,6 @@ local function RecursiveEncode(T: any)
 	end
 end
 
--- NOTE: Ensure non primitives are properly decoded
 local function RecursiveDecode(T: any)
 	for Key, Value in T do
 		if type(Value) ~= "table" then
@@ -212,6 +213,35 @@ function Selection.Load(Plugin: Plugin)
 		[OnChange("Text")] = function(NewText: string)
 			Selection.Filter.Query:set(NewText)
 		end,
+	})
+
+	Hydrate(WidgetUI.Buttons)({
+		[Children] = {
+			ForValues({ "Save", "Import", "Export" }, function(Action: string)
+				local ButtonRef = WidgetUI.Buttons[Action] :: ImageButton
+
+				return Hydrate(ButtonRef)({
+					[OnEvent("MouseEnter")] = function()
+						Plugin:GetMouse().Icon = "rbxasset://SystemCursors/PointingHand"
+					end,
+
+					[OnEvent("MouseLeave")] = function()
+						Plugin:GetMouse().Icon = ""
+					end,
+
+					[OnEvent("Activated")] = function()
+						local Handler = Actions[Action]
+
+						if not Handler then
+							warn(`[Selection] Action '{Action}' does not have a handler`)
+							return
+						end
+
+						Handler(Selection)
+					end,
+				})
+			end, Fusion.cleanup),
+		},
 	})
 end
 
