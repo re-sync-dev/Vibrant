@@ -5,5 +5,5 @@ registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 [dependencies]
-Nebulight = "vyon/nebulight@^0"
+Nebulight = "vyon/nebulight@0.2.1"
 Fusion = "elttob/fusion@0.2.0"
