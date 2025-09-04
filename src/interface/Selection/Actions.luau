@@ -143,8 +143,8 @@ return {
 		ConfigRef.Parent = Lighting
 	end,
 
-	ExportAsModule = function(Info: PresetInfo)
-		local Source = "return " .. Nebulight.SaveAsModule(Info.Preset)
+	ExportAsModule = function(Info: PresetInfo, Minify: boolean?)
+		local Source = "return " .. Nebulight.SaveAsModule(Info.Preset, Minify)
 
 		local ModuleScript = Instance.new("ModuleScript")
 		ModuleScript.Name = Info.Name

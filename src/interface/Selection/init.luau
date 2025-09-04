@@ -177,7 +177,9 @@ function Selection.Refresh()
 				if Selection.ExportTarget == "Folder" then
 					Actions.ExportAsFolder(PresetInfo)
 				elseif Selection.ExportTarget == "Module" then
-					Actions.ExportAsModule(PresetInfo)
+					local Settings = Plugin:GetSetting("Settings") or {}
+
+					Actions.ExportAsModule(PresetInfo, Settings.Minify)
 				else
 					Preview.Set(PresetInfo.Name, PresetInfo.Preset)
 				end
