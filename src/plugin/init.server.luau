@@ -25,7 +25,7 @@ SelectionButton.Click:Connect(function()
 	Widget.Enabled = not Widget.Enabled
 end)
 
-local SettingsButton = Toolbar:CreateButton("settings", "Openn Settings", "rbxassetid://92152739729044", "Settings")
+local SettingsButton = Toolbar:CreateButton("settings", "Open Settings", "rbxassetid://92152739729044", "Settings")
 
 SettingsButton.Click:Connect(function()
 	local CurrentSettings = plugin:GetSetting("Settings") or DefaultSettings
