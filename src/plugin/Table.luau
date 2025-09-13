@@ -1,12 +1,13 @@
-local Util = {}
+-- Main Module:
+local Table = {}
 
-function Util.Copy<T>(Input: T, IsDeep: boolean?): T
+function Table.Copy<T>(Input: T, IsDeep: boolean?): T
 	local RetypedInput: any = Input
 	local Copy: any = {}
 
 	for Key, Value in RetypedInput do
 		if typeof(Value) == "table" and IsDeep then
-			Copy[Key] = Util.Copy(Value, IsDeep)
+			Copy[Key] = Table.Copy(Value, IsDeep)
 		else
 			Copy[Key] = Value
 		end
@@ -15,4 +16,4 @@ function Util.Copy<T>(Input: T, IsDeep: boolean?): T
 	return Copy
 end
 
-return Util
+return Table

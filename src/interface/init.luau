@@ -8,8 +8,8 @@ Interface.Preview = Preview
 Interface.Selection = Selection
 
 function Interface.Load(Plugin: Plugin)
-	Preview.Load(Plugin)
-	Selection.Load(Plugin)
+	Preview:Load(Plugin)
+	Selection:Load(Plugin)
 end
 
 return Interface

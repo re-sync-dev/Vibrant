@@ -1,3 +1,4 @@
+--!strict
 -- Modules:
 local Root = script.Parent.Parent
 
@@ -6,6 +7,20 @@ local Nebulight = require(Root.Packages.Nebulight)
 
 -- Types:
 type WidgetUI = typeof(script.Parent.Widgets.Preview)
+
+type PreviewWidget = {
+	-- Fields --
+	Plugin: Plugin?,
+	Widget: DockWidgetPluginGui?,
+	Orientation: Fusion.Computed<CFrame>,
+	Dragging: boolean,
+	_UpdateThread: thread?,
+	_Preset: Nebulight.Preset?,
+
+	-- Methods --
+	Set: (self: PreviewWidget, Name: string, Preset: Nebulight.Preset) -> (),
+	Load: (self: PreviewWidget, Plugin: Plugin) -> (),
+}
 
 -- Constants:
 local WINDOW_WIDTH = 730
@@ -24,25 +39,22 @@ local OnEvent = Fusion.OnEvent
 local AngleX, AngleY = Value(0), Value(0)
 
 -- Main Module:
-local Preview = {}
-Preview.Widget = nil :: DockWidgetPluginGui?
+local Preview = {} :: PreviewWidget
 Preview.Orientation = Computed(function()
 	return CFrame.fromOrientation(math.rad(AngleX:get()), math.rad(AngleY:get()), 0)
 end, Fusion.cleanup)
 Preview.Dragging = false
-Preview._UpdateThread = nil :: thread?
-Preview._Preset = nil :: Nebulight.Preset?
 
-function Preview.Set(Name: string, Preset: Nebulight.Preset)
-	local Widget = Preview.Widget
-	local WidgetUI = Widget and Widget:FindFirstChild("Main") :: WidgetUI
+function Preview:Set(Name: string, Preset: Nebulight.Preset)
+	local Widget = self.Widget
 
-	if not WidgetUI then
+	if not Widget then
 		return
 	end
 
-	Preview._Preset = Preset
+	self._Preset = Preset
 
+	local WidgetUI = Widget:FindFirstChild("Main") :: WidgetUI
 	Widget.Enabled = true
 	WidgetUI.Notice.Visible = true
 	WidgetUI.Preset.Text = Name
@@ -62,27 +74,27 @@ function Preview.Set(Name: string, Preset: Nebulight.Preset)
 		Child.Decal.Texture = FaceTexture
 	end
 
-	if Preview._UpdateThread then
-		task.cancel(Preview._UpdateThread)
-		Preview._UpdateThread = nil
+	if self._UpdateThread then
+		task.cancel(self._UpdateThread)
+		self._UpdateThread = nil
 	end
 
-	Preview._UpdateThread = task.defer(function()
+	self._UpdateThread = task.defer(function()
 		local Camera = WidgetUI.Viewport.CurrentCamera
 
 		while Widget.Enabled and Camera do
-			Camera.CFrame = Camera.CFrame:Lerp(Preview.Orientation:get(), 0.7)
+			Camera.CFrame = Camera.CFrame:Lerp(self.Orientation:get(), 0.7)
 
 			task.wait(FPS)
 		end
 
-		Preview.Dragging = false
-		Preview._UpdateThread = nil
+		self.Dragging = false
+		self._UpdateThread = nil
 	end)
 end
 
-function Preview.Load(Plugin: Plugin)
-	Preview.Plugin = Plugin
+function Preview:Load(Plugin: Plugin)
+	self.Plugin = Plugin
 
 	local Widget = Plugin:CreateDockWidgetPluginGui(
 		"Preview",
@@ -104,7 +116,7 @@ function Preview.Load(Plugin: Plugin)
 	WidgetUI.Name = "Main"
 	WidgetUI.Parent = Widget
 
-	Preview.Widget = Widget
+	self.Widget = Widget
 
 	local Mouse = Plugin:GetMouse()
 
@@ -127,19 +139,19 @@ function Preview.Load(Plugin: Plugin)
 
 	Hydrate(WidgetUI.Detector)({
 		[OnEvent("MouseButton1Down")] = function()
-			Preview.Dragging = true
+			self.Dragging = true
 			Mouse.Icon = "rbxasset://SystemCursors/ClosedHand"
 		end,
 		[OnEvent("MouseButton1Up")] = function()
 			Mouse.Icon = "rbxasset://SystemCursors/OpenHand"
-			Preview.Dragging = false
+			self.Dragging = false
 		end,
 		[OnEvent("MouseEnter")] = function()
 			InDetector = true
 			Mouse.Icon = "rbxasset://SystemCursors/OpenHand"
 		end,
 		[OnEvent("MouseLeave")] = function()
-			Preview.Dragging = false
+			self.Dragging = false
 			InDetector = false
 			Mouse.Icon = ""
 		end,
@@ -151,7 +163,7 @@ function Preview.Load(Plugin: Plugin)
 			Update(Input.Position, Vector3.zero)
 		end,
 		[OnEvent("InputChanged")] = function(Input: InputObject)
-			if not Preview.Dragging then
+			if not self.Dragging then
 				return
 			end
 
@@ -173,13 +185,13 @@ function Preview.Load(Plugin: Plugin)
 		end,
 
 		[OnEvent("Activated")] = function()
-			if not Preview._Preset then
+			if not self._Preset then
 				return
 			end
 
 			Widget.Enabled = false
 
-			Nebulight.UsePreset(Preview._Preset)
+			Nebulight.UsePreset(self._Preset)
 		end,
 	})
 
@@ -193,13 +205,13 @@ function Preview.Load(Plugin: Plugin)
 		end,
 
 		[OnEvent("Activated")] = function()
-			if not Preview._Preset then
+			if not self._Preset then
 				return
 			end
 
 			Widget.Enabled = false
 
-			Nebulight.UsePreset(Preview._Preset, true)
+			Nebulight.UsePreset(self._Preset, true)
 		end,
 	})
 end

@@ -1,3 +1,4 @@
+--!strict
 -- Services:
 local HttpService = game:GetService("HttpService")
 
@@ -6,7 +7,7 @@ local Root = script.Parent.Parent
 
 local Actions = require(script.Actions)
 local Preview = require(script.Parent.Preview)
-local Util = require(script.Parent.Util)
+local Table = require(script.Parent.Parent.Table)
 
 local Fusion = require(Root.Packages.Fusion)
 local Nebulight = require(Root.Packages.Nebulight)
@@ -16,6 +17,25 @@ type WidgetUI = typeof(script.Parent.Widgets.Presets)
 type PresetInfo = {
 	Name: string,
 	Preset: Nebulight.Preset,
+}
+
+type SelectionWidget = {
+	-- Fields --
+	Plugin: Plugin?,
+	Widget: DockWidgetPluginGui?,
+	Presets: { PresetInfo },
+	CustomPresets: { PresetInfo },
+	ExportTarget: "Folder" | "Module" | "",
+	Filter: {
+		Query: Fusion.Value<string>,
+		OnlyFavorites: boolean,
+	},
+
+	-- Methods --
+	AddPreset: (self: SelectionWidget, Name: string, Preset: Nebulight.Preset) -> (),
+	RemovePreset: (self: SelectionWidget, Preset: PresetInfo) -> (),
+	Refresh: (self: SelectionWidget) -> (),
+	Load: (self: SelectionWidget, Plugin: Plugin) -> (),
 }
 
 -- Constants:
@@ -69,63 +89,69 @@ local function RecursiveDecode(T: any)
 end
 
 -- Main Module:
-local Selection = {}
-Selection.Plugin = nil :: Plugin?
-Selection.Widget = nil :: DockWidgetPluginGui?
-Selection.Presets = {} :: { PresetInfo }
-Selection.CustomPresets = {} :: { PresetInfo }
+local Selection = {} :: SelectionWidget
+Selection.Presets = {}
+Selection.CustomPresets = {}
 Selection.ExportTarget = ""
 Selection.Filter = {
 	Query = Value(""),
 	OnlyFavorites = false,
 }
 
-function Selection.AddPreset(Name: string, Preset: Nebulight.Preset)
-	table.insert(Selection.CustomPresets, {
+function Selection:AddPreset(Name: string, Preset: Nebulight.Preset)
+	if not self.Plugin then
+		return
+	end
+
+	table.insert(self.CustomPresets, {
 		Name = Name,
 		Preset = Preset,
 	})
 
-	local CustomPresets = Util.Copy(Selection.CustomPresets, true)
+	local CustomPresets = Table.Copy(self.CustomPresets, true)
 	RecursiveEncode(CustomPresets)
 
-	Selection.Plugin:SetSetting("Presets", HttpService:JSONEncode(CustomPresets))
+	self.Plugin:SetSetting("Presets", HttpService:JSONEncode(CustomPresets))
 
-	Selection.Refresh()
+	self:Refresh()
 end
 
-function Selection.RemovePreset(Preset: PresetInfo)
-	local Index = table.find(Selection.CustomPresets, Preset)
+function Selection:RemovePreset(Preset: PresetInfo)
+	if not self.Plugin then
+		return
+	end
+
+	local Index = table.find(self.CustomPresets, Preset)
 
 	if not Index then
 		return
 	end
 
-	table.remove(Selection.CustomPresets, Index)
+	table.remove(self.CustomPresets, Index)
 
-	local CustomPresets = Util.Copy(Selection.CustomPresets, true)
+	local CustomPresets = Table.Copy(self.CustomPresets, true)
 	RecursiveEncode(CustomPresets)
 
-	Selection.Plugin:SetSetting("Presets", HttpService:JSONEncode(CustomPresets))
+	self.Plugin:SetSetting("Presets", HttpService:JSONEncode(CustomPresets))
 
-	Selection.Refresh()
+	self:Refresh()
 end
 
-function Selection.Refresh()
-	local Plugin = Selection.Plugin
+function Selection:Refresh()
+	local Plugin = self.Plugin
 
 	if not Plugin then
 		return
 	end
 
-	local Widget = Selection.Widget
-	local WidgetUI = Widget and Widget:FindFirstChild("Main") :: WidgetUI
+	local Widget = self.Widget
 
-	if not WidgetUI then
+	if not Widget then
 		return
 	end
 
-	Widget.Title = "Lighting Presets"
+	local WidgetUI = Widget:FindFirstChild("Main") :: WidgetUI
+	Widget.Title = "Vibrant"
 
 	-- Clear list:
 	for _, Child in WidgetUI.List:GetChildren() do
@@ -136,13 +162,13 @@ function Selection.Refresh()
 		Child:Destroy()
 	end
 
-	local SearchQuery = Selection.Filter.Query
+	local SearchQuery = self.Filter.Query
 
 	local function CreateEntry(Index: number, PresetInfo: PresetInfo, IsCustom: boolean?)
 		local Clone = script.Parent.Templates.PresetPreview:Clone()
 		Clone.Name = PresetInfo.Name
 		Clone.Preset.Label.Text = PresetInfo.Name
-		Clone.Preview.Image = PresetInfo.Preset.Sky and PresetInfo.Preset.Sky.Front or "" -- TODO: Add no skybox image
+		Clone.Preview.Image = PresetInfo.Preset.Sky and PresetInfo.Preset.Sky.Front or ""
 		Clone.ZIndex = Index
 		Clone.Parent = WidgetUI.List
 
@@ -174,17 +200,17 @@ function Selection.Refresh()
 			end,
 
 			[OnEvent("Activated")] = function()
-				if Selection.ExportTarget == "Folder" then
+				if self.ExportTarget == "Folder" then
 					Actions.ExportAsFolder(PresetInfo)
-				elseif Selection.ExportTarget == "Module" then
+				elseif self.ExportTarget == "Module" then
 					local Settings = Plugin:GetSetting("Settings") or {}
 
 					Actions.ExportAsModule(PresetInfo, Settings.Minify)
 				else
-					Preview.Set(PresetInfo.Name, PresetInfo.Preset)
+					Preview:Set(PresetInfo.Name, PresetInfo.Preset)
 				end
 
-				Selection.ExportTarget = ""
+				self.ExportTarget = ""
 			end,
 		})
 
@@ -204,7 +230,7 @@ function Selection.Refresh()
 
 			[OnEvent("Activated")] = function()
 				if TrashConfirmed then
-					Selection.RemovePreset(PresetInfo)
+					self:RemovePreset(PresetInfo)
 				else
 					TrashColor:set(Color3.new(1, 0, 0))
 					TrashConfirmed = true
@@ -213,27 +239,27 @@ function Selection.Refresh()
 		})
 	end
 
-	for Index, PresetInfo in Selection.Presets do
+	for Index, PresetInfo in self.Presets do
 		CreateEntry(Index, PresetInfo)
 	end
 
-	for Index, PresetInfo in Selection.CustomPresets do
-		Index += #Selection.Presets --> Custom preset will always come after default ones
+	for Index, PresetInfo in self.CustomPresets do
+		Index += #self.Presets --> Custom preset will always come after default ones
 
 		CreateEntry(Index, PresetInfo, true)
 	end
 end
 
-function Selection.Load(Plugin: Plugin)
-	Selection.Plugin = Plugin
+function Selection:Load(Plugin: Plugin)
+	self.Plugin = Plugin
 
 	do -- Load custom presets:
 		local JSONString = Plugin:GetSetting("Presets")
 
 		if JSONString then
-			Selection.CustomPresets = HttpService:JSONDecode(JSONString) or {}
+			self.CustomPresets = HttpService:JSONDecode(JSONString) or {}
 
-			RecursiveDecode(Selection.CustomPresets)
+			RecursiveDecode(self.CustomPresets)
 		end
 	end
 
@@ -257,13 +283,13 @@ function Selection.Load(Plugin: Plugin)
 	WidgetUI.Name = "Main"
 	WidgetUI.Parent = Widget
 
-	Selection.Widget = Widget
+	self.Widget = Widget
 
-	Selection.Refresh()
+	self:Refresh()
 
 	Hydrate(WidgetUI.Search)({
 		[OnChange("Text")] = function(NewText: string)
-			Selection.Filter.Query:set(NewText)
+			self.Filter.Query:set(NewText)
 		end,
 	})
 
@@ -306,14 +332,14 @@ function Selection.Load(Plugin: Plugin)
 
 	Hydrate(ExportWindow.Folder)({
 		[OnEvent("Activated")] = function()
-			Selection.ExportTarget = "Folder"
+			self.ExportTarget = "Folder"
 			ExportWindow.Visible = false
 		end,
 	})
 
 	Hydrate(ExportWindow.Module)({
 		[OnEvent("Activated")] = function()
-			Selection.ExportTarget = "Module"
+			self.ExportTarget = "Module"
 			ExportWindow.Visible = false
 		end,
 	})
@@ -322,7 +348,7 @@ end
 for _, Child in script.Presets:GetChildren() do
 	table.insert(Selection.Presets, {
 		Name = Child.Name,
-		Preset = require(Child),
+		Preset = (require)(Child), --> Typechecker complaining even when Child was asserted as a ModuleScript
 	})
 end
 

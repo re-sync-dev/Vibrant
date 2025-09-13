@@ -86,4 +86,8 @@ plugin.Deactivation:Connect(function()
 	if CoreGui:FindFirstChild("_Vibrant_PresetInput") then
 		(CoreGui._Vibrant_PresetInput :: ScreenGui):Destroy()
 	end
+
+	if TestService:FindFirstChild("VibrantSettings") then
+		(TestService :: any).VibrantSettings:Destroy()
+	end
 end)
