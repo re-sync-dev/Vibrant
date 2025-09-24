@@ -10,7 +10,7 @@ local Nebulight = require(script.Parent.Parent.Parent.Packages.Nebulight)
 type SelectionWidget = {
 	Widget: PluginGui & { Main: Frame & { Export: Frame } },
 
-	AddPreset: (Name: string, Preset: Nebulight.Preset) -> (),
+	AddPreset: (self: SelectionWidget, Name: string, Preset: Nebulight.Preset) -> (),
 }
 
 type PresetInfo = {
@@ -89,7 +89,7 @@ return {
 
 			local Preset = Nebulight.CreatePreset()
 
-			Widget.AddPreset(Name, Preset)
+			Widget:AddPreset(Name, Preset)
 			Container:Destroy()
 		end)
 	end,
@@ -113,7 +113,7 @@ return {
 				return
 			end
 
-			Widget.AddPreset(PresetRef.Name, Result)
+			Widget:AddPreset(PresetRef.Name, Result)
 			Clone:Destroy()
 		elseif PresetRef:IsA("Folder") then
 			local Preset, DidCreate = Nebulight.CreateFromConfig(PresetRef)
@@ -127,7 +127,7 @@ return {
 				return
 			end
 
-			Widget.AddPreset(PresetRef.Name, Preset)
+			Widget:AddPreset(PresetRef.Name, Preset)
 		end
 	end,
 
