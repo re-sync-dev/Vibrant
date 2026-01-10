@@ -1,3 +1,4 @@
+--!strict
 -- Main Module:
 local Table = {}
 

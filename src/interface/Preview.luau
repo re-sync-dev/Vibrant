@@ -96,7 +96,7 @@ end
 function Preview:Load(Plugin: Plugin)
 	self.Plugin = Plugin
 
-	local Widget = Plugin:CreateDockWidgetPluginGui(
+	local Widget = Plugin:CreateDockWidgetPluginGuiAsync(
 		"Preview",
 		DockWidgetPluginGuiInfo.new(
 			Enum.InitialDockState.Float,
@@ -120,7 +120,10 @@ function Preview:Load(Plugin: Plugin)
 
 	local Mouse = Plugin:GetMouse()
 
-	WidgetUI.Viewport.CurrentCamera = WidgetUI.Viewport.Camera
+	local Camera = Instance.new("Camera")
+	Camera.Parent = WidgetUI.Viewport
+
+	WidgetUI.Viewport.CurrentCamera = Camera
 
 	local InDetector = false
 

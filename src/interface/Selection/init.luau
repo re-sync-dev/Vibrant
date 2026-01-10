@@ -263,7 +263,7 @@ function Selection:Load(Plugin: Plugin)
 		end
 	end
 
-	local Widget = Plugin:CreateDockWidgetPluginGui(
+	local Widget = Plugin:CreateDockWidgetPluginGuiAsync(
 		"Lighting Presets",
 		DockWidgetPluginGuiInfo.new(
 			Enum.InitialDockState.Right,
@@ -283,20 +283,22 @@ function Selection:Load(Plugin: Plugin)
 	WidgetUI.Name = "Main"
 	WidgetUI.Parent = Widget
 
+	local List = WidgetUI.List
+
 	self.Widget = Widget
 
 	self:Refresh()
 
-	Hydrate(WidgetUI.Search)({
+	Hydrate(WidgetUI.Actions.Search)({
 		[OnChange("Text")] = function(NewText: string)
 			self.Filter.Query:set(NewText)
 		end,
 	})
 
-	Hydrate(WidgetUI.Buttons)({
+	Hydrate(WidgetUI.Actions.Buttons)({
 		[Children] = {
 			ForValues({ "Save", "Import", "Export" }, function(Action: string)
-				local ButtonRef = WidgetUI.Buttons[Action] :: ImageButton
+				local ButtonRef = WidgetUI.Actions.Buttons[Action] :: ImageButton
 
 				return Hydrate(ButtonRef)({
 					[OnEvent("MouseEnter")] = function()
@@ -327,6 +329,7 @@ function Selection:Load(Plugin: Plugin)
 	Hydrate(ExportWindow.Close)({
 		[OnEvent("Activated")] = function()
 			ExportWindow.Visible = false
+			List.Visible = true
 		end,
 	})
 
@@ -334,6 +337,7 @@ function Selection:Load(Plugin: Plugin)
 		[OnEvent("Activated")] = function()
 			self.ExportTarget = "Folder"
 			ExportWindow.Visible = false
+			List.Visible = true
 		end,
 	})
 
@@ -341,6 +345,7 @@ function Selection:Load(Plugin: Plugin)
 		[OnEvent("Activated")] = function()
 			self.ExportTarget = "Module"
 			ExportWindow.Visible = false
+			List.Visible = true
 		end,
 	})
 end

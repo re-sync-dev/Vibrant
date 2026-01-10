@@ -1,3 +1,5 @@
+--!strict
+-- Services:
 local CoreGui = game:GetService("CoreGui")
 local TestService = game:GetService("TestService")
 local ScriptEditorService = game:GetService("ScriptEditorService")

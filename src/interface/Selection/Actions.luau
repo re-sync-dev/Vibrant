@@ -1,3 +1,4 @@
+--!strict
 -- Services:
 local CoreGui = game:GetService("CoreGui")
 local Lighting = game:GetService("Lighting")
@@ -8,7 +9,7 @@ local Nebulight = require(script.Parent.Parent.Parent.Packages.Nebulight)
 
 -- Types:
 type SelectionWidget = {
-	Widget: PluginGui & { Main: Frame & { Export: Frame } },
+	Widget: PluginGui & { Main: Frame & { Export: Frame, List: ScrollingFrame } },
 
 	AddPreset: (self: SelectionWidget, Name: string, Preset: Nebulight.Preset) -> (),
 }
@@ -132,8 +133,10 @@ return {
 	end,
 
 	Export = function(Widget: SelectionWidget)
+		local List = Widget.Widget.Main.List
 		local ExportWindow = Widget.Widget.Main.Export
 
+		List.Visible = ExportWindow.Visible
 		ExportWindow.Visible = not ExportWindow.Visible
 	end,
 
@@ -141,6 +144,8 @@ return {
 		local ConfigRef = Nebulight.SaveAsConfig(Info.Preset)
 		ConfigRef.Name = Info.Name
 		ConfigRef.Parent = Lighting
+
+		Selection:Set({ ConfigRef })
 	end,
 
 	ExportAsModule = function(Info: PresetInfo, Minify: boolean?)
@@ -150,5 +155,7 @@ return {
 		ModuleScript.Name = Info.Name
 		ModuleScript.Source = Source
 		ModuleScript.Parent = Lighting
+
+		Selection:Set({ ModuleScript })
 	end,
 }
